@@ -119,13 +119,14 @@ test("keeps giveaway administration and writes server-protected", async () => {
 });
 
 test("lists all four current YouTube videos", async () => {
-  const [content, sitemap, youtube, dailymotion, videosPage, videoPage, adminRoute] =
+  const [content, sitemap, youtube, dailymotion, videosPage, videoExplorer, videoPage, adminRoute] =
     await Promise.all([
     source("app/content.ts"),
     source("app/sitemap.ts"),
     source("app/youtube.ts"),
     source("app/dailymotion.ts"),
     source("app/videolar/page.tsx"),
+    source("app/videolar/VideoExplorer.tsx"),
     source("app/videolar/[videoId]/page.tsx"),
     source("app/api/admin/content/route.ts"),
   ]);
@@ -146,6 +147,10 @@ test("lists all four current YouTube videos", async () => {
   assert.match(dailymotion, /DAILYMOTION_CACHE_MS = 5 \* 60 \* 1000/);
   assert.match(dailymotion, /pendingDailymotionRequests/);
   assert.match(videosPage, /getCurrentYouTubeVideos/);
+  assert.match(videosPage, /VideoExplorer/);
+  assert.match(videoExplorer, /setActiveFilter/);
+  assert.match(videoExplorer, /videos\.slice\(0, 4\)/);
+  assert.match(videoExplorer, /href="\/arsiv"/);
   assert.match(videoPage, /getCurrentYouTubeVideos/);
   assert.match(adminRoute, /isYouTubeChannelUrl/);
 });

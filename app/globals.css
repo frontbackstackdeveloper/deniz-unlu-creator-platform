@@ -6003,3 +6003,162 @@ a.archive-card:hover {
     cursor: wait;
   }
 }
+
+/* Ortak etkileşim dili: büyüyen camgöbeği çizgi ve yumuşak derinlik. */
+.filter-pill {
+  position: relative;
+  overflow: hidden;
+  appearance: none;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.filter-pill::after,
+.button--ghost::before {
+  position: absolute;
+  right: 10px;
+  bottom: 4px;
+  left: 10px;
+  height: 1px;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  transform: scaleX(0);
+  transition: transform 220ms ease;
+}
+
+.button--ghost::before {
+  right: 16px;
+  bottom: 7px;
+  left: 16px;
+}
+
+.filter-pill:hover,
+.filter-pill:focus-visible {
+  border-color: rgba(52, 200, 255, 0.34);
+  color: #dff7ff;
+  background: rgba(52, 200, 255, 0.055);
+  transform: translateY(-1px);
+}
+
+.filter-pill:hover::after,
+.filter-pill:focus-visible::after,
+.filter-pill--active::after,
+.button--ghost:hover::before,
+.button--ghost:focus-visible::before {
+  transform: scaleX(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(
+    a.platform-card,
+    .video-card,
+    a.server-card,
+    a.archive-card,
+    .community-thread
+  ) {
+    transition:
+      transform 200ms ease,
+      border-color 200ms ease,
+      background 200ms ease,
+      box-shadow 240ms ease;
+  }
+
+  :is(
+    a.platform-card,
+    .video-card,
+    a.server-card,
+    a.archive-card,
+    .community-thread
+  )::before {
+    position: absolute;
+    right: 18px;
+    bottom: 0;
+    left: 18px;
+    z-index: 6;
+    height: 1px;
+    content: "";
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    filter: drop-shadow(0 0 5px rgba(52, 200, 255, 0.7));
+    transform: scaleX(0);
+    transition: transform 240ms ease;
+  }
+
+  :is(
+    a.platform-card,
+    .video-card,
+    a.server-card,
+    a.archive-card,
+    .community-thread
+  ):is(:hover, :focus-visible) {
+    box-shadow:
+      0 20px 44px rgba(0, 0, 0, 0.28),
+      0 0 28px rgba(52, 200, 255, 0.055);
+  }
+
+  :is(
+    a.platform-card,
+    .video-card,
+    a.server-card,
+    a.archive-card,
+    .community-thread
+  ):is(:hover, :focus-visible)::before {
+    transform: scaleX(1);
+  }
+
+  .button > [aria-hidden="true"],
+  a.platform-card > [aria-hidden="true"],
+  .server-arrow {
+    transition:
+      color 180ms ease,
+      border-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .button:hover > [aria-hidden="true"],
+  a.platform-card:hover > [aria-hidden="true"],
+  a.server-card:hover .server-arrow {
+    color: var(--cyan);
+    border-color: rgba(52, 200, 255, 0.34);
+    transform: translate(2px, -2px);
+  }
+}
+
+@media (pointer: fine) {
+  html,
+  body,
+  body * {
+    cursor: url("/lotus-cursor.png") 15 15, auto !important;
+  }
+
+  a,
+  button,
+  summary,
+  select,
+  label[for],
+  [role="button"] {
+    cursor: url("/lotus-cursor-active.png") 15 15, pointer !important;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed !important;
+  }
+
+  [aria-busy="true"] {
+    cursor: wait !important;
+  }
+}
