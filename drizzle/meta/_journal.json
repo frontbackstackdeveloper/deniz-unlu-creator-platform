@@ -36,6 +36,13 @@
       "when": 1785039670320,
       "tag": "0004_remarkable_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1785100468467,
+      "tag": "0005_seed_first_giveaway",
+      "breakpoints": true
     }
   ]
 }

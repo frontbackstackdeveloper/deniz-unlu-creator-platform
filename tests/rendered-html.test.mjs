@@ -59,6 +59,8 @@ test("keeps giveaway administration and writes server-protected", async () => {
     entryForm,
     turnstile,
     privacy,
+    giveawayStore,
+    giveawaySeed,
   ] =
     await Promise.all([
     source("app/admin/page.tsx"),
@@ -68,6 +70,8 @@ test("keeps giveaway administration and writes server-protected", async () => {
     source("app/cekilis/GiveawayEntryForm.tsx"),
     source("app/turnstile.ts"),
     source("app/gizlilik/page.tsx"),
+    source("db/giveaway-store.ts"),
+    source("drizzle/0005_seed_first_giveaway.sql"),
   ]);
 
   assert.match(adminPage, /getAdminSession/);
@@ -84,6 +88,10 @@ test("keeps giveaway administration and writes server-protected", async () => {
   assert.match(turnstile, /siteverify/);
   assert.match(privacy, /ÇEKİLİŞ AYDINLATMA METNİ/i);
   assert.match(adminRoute, /purgeGiveawayEntries/);
+  assert.match(giveawayStore, /Deniz Ünlü 1\.000 EP Çekilişi/);
+  assert.match(giveawayStore, /VALUES \(\?, \?, \?, 'active', 50/);
+  assert.match(giveawaySeed, /`status` = 'active'/);
+  assert.match(giveawaySeed, /`target_entries` = 50/);
 });
 
 test("lists all four current YouTube videos", async () => {

@@ -98,12 +98,12 @@ async function initializeGiveawayStore() {
       .prepare(
         `INSERT INTO giveaways
           (title, description, prize, status, target_entries, created_at, updated_at)
-         VALUES (?, ?, ?, 'draft', 50, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+         VALUES (?, ?, ?, 'active', 50, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       )
       .bind(
-        "Deniz Ünlü Topluluk Çekilişi",
-        "Katılım koşulları ve çekiliş ayrıntıları yakında açıklanacak.",
-        "Ödül bilgisi yakında",
+        "Deniz Ünlü 1.000 EP Çekilişi",
+        "YouTube kanalına abone olan ve WhatsApp kanalına katılan 50 kişi arasından kazanan otomatik çark ile belirlenir. Katılım şartları Deniz Ünlü tarafından manuel olarak kontrol edilir.",
+        "1.000 EP",
       )
       .run();
   }
