@@ -7,6 +7,7 @@ import {
   type ManagedServer,
   type ManagedSocialLink,
 } from "../app/managed-content";
+import { getCachedPublicData, invalidatePublicData } from "./public-cache";
 
 type SocialLinkRow = {
   key: string;
@@ -160,8 +161,7 @@ function mapServer(row: ServerRow): ManagedServer {
   };
 }
 
-export async function getManagedContent() {
-  await ensureContentStore();
+async function readManagedContent() {
   const d1 = getD1();
 
   const [linkResult, serverResult] = await Promise.all([
@@ -189,13 +189,20 @@ export async function getManagedContent() {
   };
 }
 
+export async function getManagedContent() {
+  await ensureContentStore();
+  return readManagedContent();
+}
+
 export async function getPublicManagedContent() {
   try {
-    const content = await getManagedContent();
-    return {
-      links: content.links,
-      servers: content.servers.filter((server) => server.isVisible),
-    };
+    return await getCachedPublicData("managed-content", 30_000, async () => {
+      const content = await readManagedContent();
+      return {
+        links: content.links,
+        servers: content.servers.filter((server) => server.isVisible),
+      };
+    });
   } catch {
     return {
       links: defaultManagedLinks,
@@ -233,6 +240,7 @@ export async function saveManagedLinks(links: ManagedSocialLink[]) {
   });
 
   await d1.batch(statements);
+  invalidatePublicData("managed-content");
   return getManagedContent();
 }
 
@@ -263,6 +271,7 @@ export async function createManagedServer(
     )
     .run();
 
+  invalidatePublicData("managed-content");
   return Number(result.meta.last_row_id);
 }
 
@@ -294,9 +303,11 @@ export async function updateManagedServer(server: ManagedServer) {
       server.id,
     )
     .run();
+  invalidatePublicData("managed-content");
 }
 
 export async function deleteManagedServer(id: number) {
   await ensureContentStore();
   await getD1().prepare("DELETE FROM servers WHERE id = ?").bind(id).run();
+  invalidatePublicData("managed-content");
 }

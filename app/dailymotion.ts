@@ -33,6 +33,18 @@ type DailymotionListResponse = {
   list: DailymotionVideo[];
 };
 
+type DailymotionCacheEntry = {
+  expiresAt: number;
+  videos: DailymotionVideo[];
+};
+
+const DAILYMOTION_CACHE_MS = 5 * 60 * 1000;
+const dailymotionCache = new Map<string, DailymotionCacheEntry>();
+const pendingDailymotionRequests = new Map<
+  string,
+  Promise<DailymotionVideo[]>
+>();
+
 const videoFields = [
   "id",
   "title",
@@ -61,7 +73,7 @@ export function formatVideoDuration(totalSeconds: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-export async function fetchDailymotionVideos(
+async function loadDailymotionVideos(
   profileId = dailymotionProfile.id,
 ) {
   const videos: DailymotionVideo[] = [];
@@ -94,6 +106,36 @@ export async function fetchDailymotionVideos(
   }
 
   return videos;
+}
+
+export async function fetchDailymotionVideos(
+  profileId = dailymotionProfile.id,
+) {
+  const cached = dailymotionCache.get(profileId);
+  if (cached && cached.expiresAt > Date.now()) return cached.videos;
+
+  const pending = pendingDailymotionRequests.get(profileId);
+  if (pending) return pending;
+
+  const request = loadDailymotionVideos(profileId)
+    .then((videos) => {
+      dailymotionCache.set(profileId, {
+        videos,
+        expiresAt: Date.now() + DAILYMOTION_CACHE_MS,
+      });
+      return videos;
+    })
+    .catch((error) => {
+      const stale = dailymotionCache.get(profileId)?.videos;
+      if (stale?.length) return stale;
+      throw error;
+    })
+    .finally(() => {
+      pendingDailymotionRequests.delete(profileId);
+    });
+
+  pendingDailymotionRequests.set(profileId, request);
+  return request;
 }
 
 export async function getDailymotionVideo(videoId: string) {

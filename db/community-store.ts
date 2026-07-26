@@ -94,7 +94,6 @@ export async function getPublicCommunityPage(input: {
   pageSize?: number;
   category?: CommunityCategory | null;
 } = {}): Promise<CommunityPageData> {
-  await ensureCommunityStore();
   const d1 = getD1();
   const pageSize = Math.min(Math.max(Math.trunc(input.pageSize ?? 10), 1), 30);
   const requestedPage = Math.max(Math.trunc(input.page ?? 1), 1);
@@ -104,24 +103,35 @@ export async function getPublicCommunityPage(input: {
      FROM community_messages
      WHERE parent_id IS NULL AND status = 'approved'${categoryClause}`,
   );
-  const countRow = await (input.category
-    ? countStatement.bind(input.category)
-    : countStatement
-  ).first<{ value: number }>();
-  const totalThreads = Number(countRow?.value ?? 0);
-  const totalPages = Math.max(1, Math.ceil(totalThreads / pageSize));
-  const page = Math.min(requestedPage, totalPages);
-  const offset = (page - 1) * pageSize;
   const threadStatement = d1.prepare(
     `${communitySelect}
      WHERE parent_id IS NULL AND status = 'approved'${categoryClause}
      ORDER BY created_at DESC, id DESC
      LIMIT ? OFFSET ?`,
   );
-  const threadResult = await (input.category
-    ? threadStatement.bind(input.category, pageSize, offset)
-    : threadStatement.bind(pageSize, offset)
-  ).all<CommunityRow>();
+  const requestedOffset = (requestedPage - 1) * pageSize;
+  const [countRow, initialThreadResult] = await Promise.all([
+    (input.category
+      ? countStatement.bind(input.category)
+      : countStatement
+    ).first<{ value: number }>(),
+    (input.category
+      ? threadStatement.bind(input.category, pageSize, requestedOffset)
+      : threadStatement.bind(pageSize, requestedOffset)
+    ).all<CommunityRow>(),
+  ]);
+  const totalThreads = Number(countRow?.value ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalThreads / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  let threadResult = initialThreadResult;
+
+  if (page !== requestedPage) {
+    const offset = (page - 1) * pageSize;
+    threadResult = await (input.category
+      ? threadStatement.bind(input.category, pageSize, offset)
+      : threadStatement.bind(pageSize, offset)
+    ).all<CommunityRow>();
+  }
 
   const threadIds = threadResult.results.map((row) => row.id);
   let replies: CommunityMessage[] = [];

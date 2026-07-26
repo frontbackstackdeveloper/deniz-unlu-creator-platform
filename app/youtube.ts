@@ -8,6 +8,7 @@ const YOUTUBE_HOSTS = new Set([
 const CHANNEL_ID_PATTERN = /^UC[A-Za-z0-9_-]{22}$/;
 const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 const VIDEO_CACHE_MS = 5 * 60 * 1000;
+const YOUTUBE_FETCH_LIMIT = 15;
 
 export type CurrentVideo = {
   id: string;
@@ -181,14 +182,16 @@ export async function getCurrentYouTubeVideos(
     return fallbackVideos(limit);
   }
 
-  const cacheKey = `${normalizedUrl.toString()}::${limit}`;
+  const cacheKey = normalizedUrl.toString();
   const cached = videoCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) return cached.videos;
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.videos.slice(0, limit);
+  }
 
   const pending = pendingRequests.get(cacheKey);
-  if (pending) return pending;
+  if (pending) return (await pending).slice(0, limit);
 
-  const request = fetchYouTubeVideos(normalizedUrl, limit)
+  const request = fetchYouTubeVideos(normalizedUrl, YOUTUBE_FETCH_LIMIT)
     .then((videos) => {
       videoCache.set(cacheKey, {
         videos,
@@ -198,14 +201,14 @@ export async function getCurrentYouTubeVideos(
     })
     .catch(() => {
       const stale = videoCache.get(cacheKey)?.videos;
-      return stale?.length ? stale : fallbackVideos(limit);
+      return stale?.length ? stale : fallbackVideos(YOUTUBE_FETCH_LIMIT);
     })
     .finally(() => {
       pendingRequests.delete(cacheKey);
     });
 
   pendingRequests.set(cacheKey, request);
-  return request;
+  return (await request).slice(0, limit);
 }
 
 export function formatYouTubePublishedDate(value?: string) {

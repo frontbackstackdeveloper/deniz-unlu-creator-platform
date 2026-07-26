@@ -182,6 +182,7 @@ export function CommunityBoard({
           <Link
             className={activeCategory === null ? "is-active" : ""}
             href={categoryHref(null)}
+            prefetch={false}
           >
             Tümü
           </Link>
@@ -190,6 +191,7 @@ export function CommunityBoard({
               className={activeCategory === category ? "is-active" : ""}
               href={categoryHref(category)}
               key={category}
+              prefetch={false}
             >
               {communityCategoryLabel(category)}
             </Link>
@@ -255,6 +257,7 @@ export function CommunityBoard({
               className={communityPage.page === 1 ? "is-disabled" : ""}
               href={pageHref(Math.max(1, communityPage.page - 1))}
               aria-disabled={communityPage.page === 1}
+              prefetch={false}
             >
               ← Önceki
             </Link>
@@ -270,6 +273,7 @@ export function CommunityBoard({
                     aria-current={
                       page === communityPage.page ? "page" : undefined
                     }
+                    prefetch={false}
                   >
                     {page}
                   </Link>
@@ -288,6 +292,7 @@ export function CommunityBoard({
               aria-disabled={
                 communityPage.page === communityPage.totalPages
               }
+              prefetch={false}
             >
               Sonraki →
             </Link>

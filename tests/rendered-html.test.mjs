@@ -48,8 +48,11 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(siteChrome, /brand-monogram--lotus-image/);
   assert.match(siteChrome, /brand-monogram--footer/);
   assert.match(siteChrome, /METİN2 YOLCULUĞU/);
+  assert.match(siteChrome, /prefetch=\{false\}/);
   assert.match(styles, /@keyframes border-light-orbit/);
   assert.match(styles, /--orbit-angle/);
+  assert.match(styles, /lotus-cursor\.png/);
+  assert.match(styles, /lotus-cursor-active\.png/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
 });
 
@@ -65,6 +68,8 @@ test("keeps giveaway administration and writes server-protected", async () => {
     giveawayStore,
     giveawaySeed,
     gmail,
+    contentStore,
+    publicCache,
   ] =
     await Promise.all([
     source("app/admin/page.tsx"),
@@ -77,6 +82,8 @@ test("keeps giveaway administration and writes server-protected", async () => {
     source("db/giveaway-store.ts"),
     source("drizzle/0005_seed_first_giveaway.sql"),
     source("app/gmail.ts"),
+    source("db/content-store.ts"),
+    source("db/public-cache.ts"),
   ]);
 
   assert.match(adminPage, /getAdminSession/);
@@ -105,14 +112,19 @@ test("keeps giveaway administration and writes server-protected", async () => {
   assert.match(giveawayStore, /VALUES \(\?, \?, \?, 'active', 50/);
   assert.match(giveawaySeed, /`status` = 'active'/);
   assert.match(giveawaySeed, /`target_entries` = 50/);
+  assert.match(giveawayStore, /getCachedPublicData/);
+  assert.match(contentStore, /getCachedPublicData/);
+  assert.match(publicCache, /pending/);
+  assert.match(publicCache, /invalidatePublicData/);
 });
 
 test("lists all four current YouTube videos", async () => {
-  const [content, sitemap, youtube, videosPage, videoPage, adminRoute] =
+  const [content, sitemap, youtube, dailymotion, videosPage, videoPage, adminRoute] =
     await Promise.all([
     source("app/content.ts"),
     source("app/sitemap.ts"),
     source("app/youtube.ts"),
+    source("app/dailymotion.ts"),
     source("app/videolar/page.tsx"),
     source("app/videolar/[videoId]/page.tsx"),
     source("app/api/admin/content/route.ts"),
@@ -130,6 +142,9 @@ test("lists all four current YouTube videos", async () => {
   assert.match(sitemap, /gizlilik/);
   assert.match(youtube, /feeds\/videos/);
   assert.match(youtube, /VIDEO_CACHE_MS = 5 \* 60 \* 1000/);
+  assert.match(youtube, /YOUTUBE_FETCH_LIMIT/);
+  assert.match(dailymotion, /DAILYMOTION_CACHE_MS = 5 \* 60 \* 1000/);
+  assert.match(dailymotion, /pendingDailymotionRequests/);
   assert.match(videosPage, /getCurrentYouTubeVideos/);
   assert.match(videoPage, /getCurrentYouTubeVideos/);
   assert.match(adminRoute, /isYouTubeChannelUrl/);
@@ -162,6 +177,7 @@ test("provides a direct-publish manageable community board with pagination", asy
   assert.match(communityBoard, /Yanıtla/);
   assert.match(communityBoard, /community-pagination/);
   assert.match(communityBoard, /doğrudan\s+yayınlanır/);
+  assert.match(communityBoard, /prefetch=\{false\}/);
   assert.match(communityModeration, /containsBlockedCommunityLanguage/);
   assert.match(publicRoute, /verifyTurnstileToken/);
   assert.match(publicRoute, /containsBlockedCommunityLanguage/);
@@ -173,5 +189,6 @@ test("provides a direct-publish manageable community board with pagination", asy
   assert.match(communityStore, /VALUES \(\?, \?, \?, \?, \?, 'approved'/);
   assert.match(communityStore, /LIMIT \? OFFSET \?/);
   assert.match(communityStore, /status = 'approved'/);
+  assert.match(communityStore, /Promise\.all/);
   assert.match(schema, /communityMessages/);
 });

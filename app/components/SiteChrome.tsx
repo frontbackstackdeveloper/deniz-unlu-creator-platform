@@ -79,11 +79,11 @@ export function SiteHeader() {
         </Link>
 
         <nav aria-label="Ana menü">
-          <Link href="/videolar">Videolar</Link>
-          <Link href="/arsiv">Arşiv</Link>
-          <Link href="/sunucular">Sunucular</Link>
-          <Link href="/cekilis">Çekiliş</Link>
-          <Link href="/topluluk">Topluluk</Link>
+          <Link href="/videolar" prefetch={false}>Videolar</Link>
+          <Link href="/arsiv" prefetch={false}>Arşiv</Link>
+          <Link href="/sunucular" prefetch={false}>Sunucular</Link>
+          <Link href="/cekilis" prefetch={false}>Çekiliş</Link>
+          <Link href="/topluluk" prefetch={false}>Topluluk</Link>
         </nav>
 
         <Link className="header-cta" href="/#topluluk">
@@ -91,11 +91,11 @@ export function SiteHeader() {
         </Link>
       </header>
       <nav className="mobile-nav" aria-label="Mobil menü">
-        <Link href="/videolar">Videolar</Link>
-        <Link href="/arsiv">Arşiv</Link>
-        <Link href="/sunucular">Sunucular</Link>
-        <Link href="/cekilis">Çekiliş</Link>
-        <Link href="/topluluk">Topluluk</Link>
+        <Link href="/videolar" prefetch={false}>Videolar</Link>
+        <Link href="/arsiv" prefetch={false}>Arşiv</Link>
+        <Link href="/sunucular" prefetch={false}>Sunucular</Link>
+        <Link href="/cekilis" prefetch={false}>Çekiliş</Link>
+        <Link href="/topluluk" prefetch={false}>Topluluk</Link>
       </nav>
     </>
   );
@@ -192,6 +192,7 @@ export function VideoCard({
     <Link
       className={`video-card video-card--${video.accent}`}
       href={video.href}
+      prefetch={false}
     >
       <div
         className={`video-art${video.thumbnailUrl ? " video-art--thumbnail" : ""}`}

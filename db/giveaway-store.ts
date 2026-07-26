@@ -6,6 +6,7 @@ import type {
   GiveawayStatus,
   PublicGiveaway,
 } from "../app/giveaway";
+import { getCachedPublicData, invalidatePublicData } from "./public-cache";
 
 type GiveawayRow = {
   id: number;
@@ -177,8 +178,10 @@ function publicWinnerName(value: string) {
   return `${parts[0]} ${parts.at(-1)?.slice(0, 1).toLocaleUpperCase("tr-TR")}.`;
 }
 
-async function latestGiveaway(includeDraft: boolean) {
-  await ensureGiveawayStore();
+async function latestGiveaway(includeDraft: boolean, initialize = true) {
+  if (initialize) {
+    await ensureGiveawayStore();
+  }
   const where = includeDraft ? "" : "WHERE status <> 'draft'";
   const row = await getD1()
     .prepare(
@@ -219,8 +222,8 @@ export async function getAdminGiveawayData(): Promise<AdminGiveawayData> {
   };
 }
 
-export async function getPublicGiveaway(): Promise<PublicGiveaway | null> {
-  const giveaway = await latestGiveaway(false);
+async function loadPublicGiveaway(): Promise<PublicGiveaway | null> {
+  const giveaway = await latestGiveaway(false, false);
   if (!giveaway) return null;
 
   const [countRow, winnerRow] = await Promise.all([
@@ -253,6 +256,14 @@ export async function getPublicGiveaway(): Promise<PublicGiveaway | null> {
       ? publicWinnerName(winnerRow.participant_name)
       : null,
   };
+}
+
+export function getPublicGiveaway(): Promise<PublicGiveaway | null> {
+  return getCachedPublicData(
+    "giveaway-public",
+    10_000,
+    loadPublicGiveaway,
+  );
 }
 
 export async function saveGiveaway(
@@ -305,6 +316,7 @@ export async function saveGiveaway(
       .run();
   }
 
+  invalidatePublicData("giveaway-public");
   return getAdminGiveawayData();
 }
 
@@ -382,6 +394,7 @@ export async function createGiveawayEntry(input: {
   if (Number(countRow?.value ?? 0) >= giveaway.targetEntries) {
     await drawWinnerForGiveaway(input.giveawayId, false);
   }
+  invalidatePublicData("giveaway-public");
 }
 
 async function drawWinnerForGiveaway(giveawayId: number, redraw: boolean) {
@@ -435,6 +448,7 @@ async function drawWinnerForGiveaway(giveawayId: number, redraw: boolean) {
       )
       .bind(giveawayId),
   ]);
+  invalidatePublicData("giveaway-public");
 }
 
 export async function drawGiveawayWinner(redraw: boolean) {
@@ -473,6 +487,7 @@ export async function deleteGiveawayEntry(entryId: number) {
     throw new Error("Katılımcı kaydı silinemedi.");
   }
 
+  invalidatePublicData("giveaway-public");
   return getAdminGiveawayData();
 }
 
@@ -493,5 +508,6 @@ export async function purgeGiveawayEntries() {
     .bind(data.giveaway.id)
     .run();
 
+  invalidatePublicData("giveaway-public");
   return getAdminGiveawayData();
 }

@@ -5969,3 +5969,37 @@ a.archive-card:hover {
     animation: none;
   }
 }
+
+@media (pointer: fine) {
+  html,
+  body {
+    cursor: url("/lotus-cursor.png") 16 16, auto;
+  }
+
+  a,
+  button,
+  summary,
+  select,
+  label[for],
+  [role="button"] {
+    cursor: url("/lotus-cursor-active.png") 16 16, pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  [aria-busy="true"] {
+    cursor: wait;
+  }
+}
