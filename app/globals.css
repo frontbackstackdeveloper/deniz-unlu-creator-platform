@@ -4046,6 +4046,26 @@ a.archive-card:hover {
   box-shadow: 0 0 0 3px rgba(52, 200, 255, 0.06);
 }
 
+.giveaway-form-fields input[readonly] {
+  border-color: rgba(43, 217, 127, 0.24);
+  color: #9ce8bd;
+  background: rgba(43, 217, 127, 0.045);
+}
+
+.verified-email-note {
+  color: #68c995;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+}
+
+.giveaway-auth-gate {
+  align-items: center;
+}
+
+.giveaway-auth-gate .giveaway-entry-form__heading {
+  grid-row: auto;
+}
+
 .giveaway-honeypot {
   position: absolute !important;
   width: 1px;
@@ -4467,6 +4487,28 @@ a.archive-card:hover {
   border-color: rgba(255, 87, 103, 0.22);
   color: #e8a0a8;
   background: rgba(255, 87, 103, 0.04);
+}
+
+.participant-delete {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 87, 103, 0.24);
+  border-radius: 8px;
+  color: #efa2aa;
+  background: rgba(255, 87, 103, 0.045);
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.participant-delete:hover:not(:disabled) {
+  border-color: rgba(255, 87, 103, 0.5);
+  background: rgba(255, 87, 103, 0.1);
+}
+
+.participant-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .community-layout {

@@ -34,6 +34,9 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(layout, /lotus-icon\.png/);
   assert.match(giveaway, /GiveawayEntryForm/);
   assert.match(giveaway, /winnerDisplayName/);
+  assert.match(giveaway, /getChatGPTUser/);
+  assert.match(giveaway, /chatGPTSignInPath/);
+  assert.match(giveaway, /verifiedEmail/);
   assert.match(home, /giveawayProgress/);
   assert.match(wheel, /wheel-segment-size/);
   assert.match(home, /live-broadcast/);
@@ -61,6 +64,7 @@ test("keeps giveaway administration and writes server-protected", async () => {
     privacy,
     giveawayStore,
     giveawaySeed,
+    gmail,
   ] =
     await Promise.all([
     source("app/admin/page.tsx"),
@@ -72,6 +76,7 @@ test("keeps giveaway administration and writes server-protected", async () => {
     source("app/gizlilik/page.tsx"),
     source("db/giveaway-store.ts"),
     source("drizzle/0005_seed_first_giveaway.sql"),
+    source("app/gmail.ts"),
   ]);
 
   assert.match(adminPage, /getAdminSession/);
@@ -88,6 +93,14 @@ test("keeps giveaway administration and writes server-protected", async () => {
   assert.match(turnstile, /siteverify/);
   assert.match(privacy, /ÇEKİLİŞ AYDINLATMA METNİ/i);
   assert.match(adminRoute, /purgeGiveawayEntries/);
+  assert.match(adminRoute, /deleteGiveawayEntry/);
+  assert.match(entryRoute, /normalizeGmailAddress/);
+  assert.match(entryRoute, /getChatGPTUser/);
+  assert.doesNotMatch(entryRoute, /body\.email/);
+  assert.match(entryForm, /value=\{verifiedEmail\}/);
+  assert.match(entryForm, /readOnly/);
+  assert.match(gmail, /@gmail\\\.com/);
+  assert.match(giveawayStore, /DELETE FROM giveaway_entries WHERE id = \?/);
   assert.match(giveawayStore, /Deniz Ünlü 1\.000 EP Çekilişi/);
   assert.match(giveawayStore, /VALUES \(\?, \?, \?, 'active', 50/);
   assert.match(giveawaySeed, /`status` = 'active'/);

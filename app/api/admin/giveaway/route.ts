@@ -1,5 +1,6 @@
 import { getAdminSession } from "../../../admin/admin-auth";
 import {
+  deleteGiveawayEntry,
   drawGiveawayWinner,
   getAdminGiveawayData,
   purgeGiveawayEntries,
@@ -119,6 +120,28 @@ export async function POST(request: Request) {
       {
         error:
           error instanceof Error ? error.message : "Kazanan seçilemedi.",
+      },
+      { status: 400 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const { isAdmin } = await getAdminSession();
+  if (!isAdmin) return unauthorized();
+
+  const entryId = Number(new URL(request.url).searchParams.get("entryId"));
+  if (!Number.isInteger(entryId) || entryId <= 0) {
+    return Response.json({ error: "Katılımcı kaydı geçersiz." }, { status: 400 });
+  }
+
+  try {
+    return Response.json(await deleteGiveawayEntry(entryId));
+  } catch (error) {
+    return Response.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Katılımcı silinemedi.",
       },
       { status: 400 },
     );

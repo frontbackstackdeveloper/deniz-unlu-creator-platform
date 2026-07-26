@@ -1,14 +1,12 @@
 import { createGiveawayEntry } from "../../../../db/giveaway-store";
+import { getChatGPTUser } from "../../../chatgpt-auth";
+import { normalizeGmailAddress } from "../../../gmail";
 import { verifyTurnstileToken } from "../../../turnstile";
 
 export const dynamic = "force-dynamic";
 
 function text(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
-}
-
-function validEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(value);
 }
 
 function sameOrigin(request: Request) {
@@ -19,6 +17,25 @@ function sameOrigin(request: Request) {
 export async function POST(request: Request) {
   if (!sameOrigin(request)) {
     return Response.json({ error: "Geçersiz istek kaynağı." }, { status: 403 });
+  }
+
+  const authenticatedUser = await getChatGPTUser();
+  if (!authenticatedUser) {
+    return Response.json(
+      {
+        error:
+          "Katılmak için önce Gmail hesabınızla güvenli giriş yapmalısınız.",
+      },
+      { status: 401 },
+    );
+  }
+
+  const email = normalizeGmailAddress(authenticatedUser.email);
+  if (!email) {
+    return Response.json(
+      { error: "Yalnızca doğrulanmış bir @gmail.com hesabıyla katılabilirsiniz." },
+      { status: 400 },
+    );
   }
 
   let body: Record<string, unknown>;
@@ -36,7 +53,6 @@ export async function POST(request: Request) {
 
   const giveawayId = Number(body.giveawayId);
   const participantName = text(body.participantName, 80);
-  const email = text(body.email, 160).toLocaleLowerCase("tr-TR");
   const youtubeConfirmed = body.youtubeConfirmed === true;
   const whatsappConfirmed = body.whatsappConfirmed === true;
   const privacyAcknowledged = body.privacyAcknowledged === true;
@@ -48,11 +64,6 @@ export async function POST(request: Request) {
   }
   if (participantName.length < 2) {
     return Response.json({ error: "Lütfen adınızı yazın." }, { status: 400 });
-  }
-  if (!validEmail(email)) {
-    return Response.json({ error: "Geçerli bir e-posta adresi yazın." }, {
-      status: 400,
-    });
   }
   if (
     !youtubeConfirmed ||

@@ -51,9 +51,7 @@ export function AdminGiveawayManager({
   );
   const [entries, setEntries] = useState(initialData.entries);
   const [notice, setNotice] = useState<Notice>(null);
-  const [busy, setBusy] = useState<
-    "save" | "draw" | "redraw" | "purge" | null
-  >(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const winner = entries.find((entry) => entry.status === "winner");
   const eligibleCount = entries.filter(
@@ -186,6 +184,41 @@ export function AdminGiveawayManager({
           error instanceof Error
             ? error.message
             : "Katılımcı verileri silinemedi.",
+      });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function deleteEntry(entryId: number, participantName: string) {
+    if (
+      !window.confirm(
+        `${participantName} adlı katılımcının kaydı kalıcı olarak silinsin mi?`,
+      )
+    ) {
+      return;
+    }
+
+    const action = `delete:${entryId}`;
+    setBusy(action);
+    setNotice(null);
+
+    try {
+      const data = await readData(
+        await fetch(`/api/admin/giveaway?entryId=${entryId}`, {
+          method: "DELETE",
+        }),
+      );
+      applyData(data);
+      setNotice({
+        tone: "success",
+        text: "Katılımcı kaydı kalıcı olarak silindi.",
+      });
+    } catch (error) {
+      setNotice({
+        tone: "error",
+        text:
+          error instanceof Error ? error.message : "Katılımcı silinemedi.",
       });
     } finally {
       setBusy(null);
@@ -339,6 +372,11 @@ export function AdminGiveawayManager({
             entries.length === 0 ||
             (giveaway.status !== "completed" && giveaway.status !== "closed")
           }
+          title={
+            giveaway.status === "completed" || giveaway.status === "closed"
+              ? "Bu çekilişteki tüm katılımcı kayıtlarını sil"
+              : "Toplu silme için önce çekiliş durumunu Katılım kapalı yapıp kaydedin"
+          }
           onClick={purgeEntries}
         >
           {busy === "purge" ? "Siliniyor…" : "Katılımcı verilerini sil"}
@@ -369,6 +407,7 @@ export function AdminGiveawayManager({
                   <th>E-posta</th>
                   <th>Katılım tarihi</th>
                   <th>Durum</th>
+                  <th>İşlem</th>
                 </tr>
               </thead>
               <tbody>
@@ -392,6 +431,23 @@ export function AdminGiveawayManager({
                             ? "Geçersiz"
                             : "Uygun"}
                       </span>
+                    </td>
+                    <td>
+                      <button
+                        className="participant-delete"
+                        type="button"
+                        disabled={busy !== null || entry.status === "winner"}
+                        title={
+                          entry.status === "winner"
+                            ? "Kazananı silmek için önce geçersiz sayıp yeniden seçim yapın"
+                            : "Bu katılımcıyı kalıcı olarak sil"
+                        }
+                        onClick={() =>
+                          deleteEntry(entry.id, entry.participantName)
+                        }
+                      >
+                        {busy === `delete:${entry.id}` ? "Siliniyor…" : "Sil"}
+                      </button>
                     </td>
                   </tr>
                 ))}

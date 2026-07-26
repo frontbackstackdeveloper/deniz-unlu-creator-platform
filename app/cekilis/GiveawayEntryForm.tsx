@@ -8,11 +8,12 @@ import Script from "next/script";
 type GiveawayEntryFormProps = {
   giveawayId: number;
   turnstileSiteKey: string;
+  verifiedEmail: string;
+  initialName: string;
 };
 
 type FormState = {
   participantName: string;
-  email: string;
   youtubeConfirmed: boolean;
   whatsappConfirmed: boolean;
   privacyAcknowledged: boolean;
@@ -20,22 +21,25 @@ type FormState = {
   website: string;
 };
 
-const initialForm: FormState = {
-  participantName: "",
-  email: "",
-  youtubeConfirmed: false,
-  whatsappConfirmed: false,
-  privacyAcknowledged: false,
-  termsAccepted: false,
-  website: "",
-};
+function initialForm(initialName: string): FormState {
+  return {
+    participantName: initialName,
+    youtubeConfirmed: false,
+    whatsappConfirmed: false,
+    privacyAcknowledged: false,
+    termsAccepted: false,
+    website: "",
+  };
+}
 
 export function GiveawayEntryForm({
   giveawayId,
   turnstileSiteKey,
+  verifiedEmail,
+  initialName,
 }: GiveawayEntryFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() => initialForm(initialName));
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{
     tone: "success" | "error";
@@ -75,7 +79,7 @@ export function GiveawayEntryForm({
         throw new Error(data.error || "Katılım kaydedilemedi.");
       }
 
-      setForm(initialForm);
+      setForm(initialForm(initialName));
       setNotice({
         tone: "success",
         text: data.message || "Katılımınız kaydedildi. Bol şans!",
@@ -98,7 +102,7 @@ export function GiveawayEntryForm({
       <div className="giveaway-entry-form__heading">
         <p className="section-kicker">ÇEKİLİŞE KATIL</p>
         <h3>Bilgilerini gönder</h3>
-        <p>Her e-posta adresi bu çekilişe yalnızca bir kez katılabilir.</p>
+        <p>Her Gmail adresi bu çekilişe yalnızca bir kez katılabilir.</p>
       </div>
 
       <div className="giveaway-form-fields">
@@ -119,20 +123,17 @@ export function GiveawayEntryForm({
           />
         </label>
         <label>
-          <span>E-posta adresi</span>
+          <span>Gmail adresi</span>
           <input
             type="email"
-            value={form.email}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                email: event.target.value,
-              }))
-            }
+            value={verifiedEmail}
             autoComplete="email"
-            maxLength={160}
-            required
+            readOnly
+            aria-readonly="true"
           />
+          <small className="verified-email-note">
+            Güvenli oturumla doğrulandı
+          </small>
         </label>
         <label className="giveaway-honeypot" aria-hidden="true">
           <span>Web sitesi</span>

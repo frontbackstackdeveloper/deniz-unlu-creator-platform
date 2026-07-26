@@ -6,6 +6,12 @@ import {
   SiteFooter,
   SiteHeader,
 } from "../components/SiteChrome";
+import {
+  chatGPTSignInPath,
+  chatGPTSignOutPath,
+  getChatGPTUser,
+} from "../chatgpt-auth";
+import { normalizeGmailAddress } from "../gmail";
 import { getPublicManagedContent } from "../../db/content-store";
 import { getPublicGiveaway } from "../../db/giveaway-store";
 import { managedLinksToMap } from "../managed-content";
@@ -21,11 +27,13 @@ export const metadata: Metadata = {
 };
 
 export default async function GiveawayPage() {
-  const [managedContent, giveaway] = await Promise.all([
+  const [managedContent, giveaway, authenticatedUser] = await Promise.all([
     getPublicManagedContent(),
     getPublicGiveaway().catch(() => null),
+    getChatGPTUser(),
   ]);
   const links = managedLinksToMap(managedContent.links);
+  const verifiedGmail = normalizeGmailAddress(authenticatedUser?.email ?? "");
   const dateFormatter = new Intl.DateTimeFormat("tr-TR", {
     dateStyle: "long",
     timeStyle: "short",
@@ -134,11 +142,52 @@ export default async function GiveawayPage() {
           </div>
         </div>
 
-        {giveaway?.isOpen && (
+        {giveaway?.isOpen && verifiedGmail && (
           <GiveawayEntryForm
             giveawayId={giveaway.id}
             turnstileSiteKey={turnstileSiteKey}
+            verifiedEmail={verifiedGmail}
+            initialName={authenticatedUser?.fullName ?? ""}
           />
+        )}
+        {giveaway?.isOpen && !authenticatedUser && (
+          <section className="giveaway-entry-form giveaway-auth-gate">
+            <div className="giveaway-entry-form__heading">
+              <p className="section-kicker">GÜVENLİ KATILIM</p>
+              <h3>Gmail hesabını doğrula</h3>
+              <p>
+                Sahte ve hatalı adresleri engellemek için katılım formu,
+                doğrulanmış hesap e-postasını otomatik kullanır.
+              </p>
+            </div>
+            <a
+              className="button button--primary"
+              href={chatGPTSignInPath("/cekilis")}
+            >
+              Güvenli giriş yap →
+            </a>
+            <small className="giveaway-manual-check">
+              Açılan hesap seçim ekranında Google hesabınızla devam edin.
+            </small>
+          </section>
+        )}
+        {giveaway?.isOpen && authenticatedUser && !verifiedGmail && (
+          <section className="giveaway-entry-form giveaway-auth-gate">
+            <div className="giveaway-entry-form__heading">
+              <p className="section-kicker">GMAIL GEREKLİ</p>
+              <h3>Farklı bir hesap seç</h3>
+              <p>
+                Çekilişe yalnızca doğrulanmış @gmail.com hesabıyla
+                katılabilirsiniz.
+              </p>
+            </div>
+            <a
+              className="button button--primary"
+              href={chatGPTSignOutPath("/cekilis")}
+            >
+              Başka Gmail hesabıyla giriş yap →
+            </a>
+          </section>
         )}
       </section>
       <SiteFooter />

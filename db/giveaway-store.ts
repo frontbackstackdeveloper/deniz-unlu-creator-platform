@@ -450,6 +450,32 @@ export async function drawGiveawayWinner(redraw: boolean) {
   return getAdminGiveawayData();
 }
 
+export async function deleteGiveawayEntry(entryId: number) {
+  const data = await getAdminGiveawayData();
+  if (!data.giveaway) throw new Error("Katılımcı kaydı bulunamadı.");
+
+  const entry = data.entries.find((candidate) => candidate.id === entryId);
+  if (!entry) throw new Error("Katılımcı kaydı bulunamadı.");
+  if (entry.status === "winner") {
+    throw new Error(
+      "Kazanan kaydı doğrudan silinemez. Önce kazananı geçersiz sayıp yeniden seçim yapın.",
+    );
+  }
+
+  const result = await getD1()
+    .prepare(
+      "DELETE FROM giveaway_entries WHERE id = ? AND giveaway_id = ?",
+    )
+    .bind(entryId, data.giveaway.id)
+    .run();
+
+  if (Number(result.meta.changes ?? 0) === 0) {
+    throw new Error("Katılımcı kaydı silinemedi.");
+  }
+
+  return getAdminGiveawayData();
+}
+
 export async function purgeGiveawayEntries() {
   const data = await getAdminGiveawayData();
   if (!data.giveaway) throw new Error("Silinecek çekiliş bulunamadı.");
