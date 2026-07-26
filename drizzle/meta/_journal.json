@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1784945108991,
+      "tag": "0000_serious_silhouette",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784948911160,
+      "tag": "0001_outstanding_ricochet",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784951492538,
+      "tag": "0002_giveaway_entries",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784952237149,
+      "tag": "0003_giveaway_capacity",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1785039670320,
+      "tag": "0004_remarkable_skreet",
+      "breakpoints": true
+    }
+  ]
+}
