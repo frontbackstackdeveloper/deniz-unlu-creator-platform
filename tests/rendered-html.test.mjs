@@ -16,6 +16,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     adminManager,
     siteChrome,
     styles,
+    interfacePolish,
   ] =
     await Promise.all([
     source("app/page.tsx"),
@@ -26,6 +27,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     source("app/admin/AdminContentManager.tsx"),
     source("app/components/SiteChrome.tsx"),
     source("app/globals.css"),
+    source("app/interface-polish.css"),
   ]);
 
   assert.match(home, /Yayın kaçarsa/);
@@ -53,6 +55,10 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(styles, /--orbit-angle/);
   assert.match(styles, /lotus-cursor\.png/);
   assert.match(styles, /lotus-cursor-active\.png/);
+  assert.match(interfacePolish, /\.watch-player iframe/);
+  assert.match(interfacePolish, /position: absolute/);
+  assert.match(interfacePolish, /\.admin-panel:hover/);
+  assert.match(interfacePolish, /\.admin-community-item/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
 });
 
@@ -152,6 +158,9 @@ test("lists all four current YouTube videos", async () => {
   assert.match(videoExplorer, /videos\.slice\(0, 4\)/);
   assert.match(videoExplorer, /href="\/arsiv"/);
   assert.match(videoPage, /getCurrentYouTubeVideos/);
+  assert.match(videoPage, /className="watch-layout"/);
+  assert.match(videoPage, /className="watch-player"/);
+  assert.match(videoPage, /className="watch-info"/);
   assert.match(adminRoute, /isYouTubeChannelUrl/);
 });
 

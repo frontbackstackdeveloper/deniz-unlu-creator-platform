@@ -1,0 +1,71 @@
+/* Izleme sayfasi sutunlarini gomulu oynaticilarin dogal genisliginden korur. */
+.watch-layout {
+  width: 100%;
+  min-width: 0;
+  align-items: start;
+}
+
+.watch-player,
+.watch-info {
+  min-width: 0;
+}
+
+.watch-player iframe {
+  width: 100%;
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.watch-info h1 {
+  overflow-wrap: anywhere;
+}
+
+/* Yonetim panelindeki kartlar icin ortak, olculu camgobegi etkilesim isigi. */
+@media (hover: hover) and (pointer: fine) {
+  .admin-panel,
+  .admin-stats article,
+  .admin-archive-connect,
+  .admin-video-list article,
+  .admin-link-row,
+  .admin-server-row,
+  .admin-giveaway-summary,
+  .admin-giveaway-summary > div,
+  .admin-community-item {
+    transition:
+      transform 200ms ease,
+      border-color 200ms ease,
+      background-color 200ms ease,
+      box-shadow 240ms ease;
+  }
+
+  .admin-panel:hover {
+    border-color: rgba(52, 200, 255, 0.25);
+    box-shadow:
+      0 22px 52px rgba(0, 0, 0, 0.25),
+      0 0 30px rgba(52, 200, 255, 0.07);
+    transform: translateY(-2px);
+  }
+
+  .admin-panel:hover::after {
+    opacity: 0.92;
+  }
+
+  :is(
+    .admin-stats article,
+    .admin-archive-connect,
+    .admin-video-list article,
+    .admin-link-row,
+    .admin-server-row,
+    .admin-giveaway-summary,
+    .admin-giveaway-summary > div,
+    .admin-community-item
+  ):hover {
+    border-color: rgba(52, 200, 255, 0.3);
+    background-color: rgba(52, 200, 255, 0.035);
+    box-shadow:
+      0 14px 30px rgba(0, 0, 0, 0.2),
+      0 0 22px rgba(52, 200, 255, 0.065);
+    transform: translateY(-2px);
+  }
+}
