@@ -17,6 +17,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     siteChrome,
     styles,
     interfacePolish,
+    mobilePerformance,
   ] =
     await Promise.all([
     source("app/page.tsx"),
@@ -28,6 +29,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     source("app/components/SiteChrome.tsx"),
     source("app/globals.css"),
     source("app/interface-polish.css"),
+    source("app/mobile-performance.css"),
   ]);
 
   assert.match(home, /Yayın kaçarsa/);
@@ -59,6 +61,13 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(interfacePolish, /position: absolute/);
   assert.match(interfacePolish, /\.admin-panel:hover/);
   assert.match(interfacePolish, /\.admin-community-item/);
+  assert.match(layout, /mobile-performance\.css/);
+  assert.match(siteChrome, /\/kuzey2-fetih\.png/);
+  assert.doesNotMatch(siteChrome, /kuzey2\.com\/server\/fetih\.png/);
+  assert.match(mobilePerformance, /\.mobile-nav/);
+  assert.match(mobilePerformance, /animation: none !important/);
+  assert.match(mobilePerformance, /content-visibility: auto/);
+  assert.match(mobilePerformance, /\.server-code--logo/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
 });
 

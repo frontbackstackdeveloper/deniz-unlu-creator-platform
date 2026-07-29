@@ -15,7 +15,7 @@ type DisplayServer = {
 };
 
 const officialServerLogos = {
-  kuzey2: "https://kuzey2.com/server/fetih.png",
+  kuzey2: "/kuzey2-fetih.png",
   rohan2: "https://rohan2.global/assets/images/logo.png",
 } as const;
 
