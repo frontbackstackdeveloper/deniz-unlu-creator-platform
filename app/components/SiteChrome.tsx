@@ -79,6 +79,7 @@ export function SiteHeader() {
         </Link>
 
         <nav aria-label="Ana menü">
+          <Link href="/yayin" prefetch={false}>Canlı Yayın</Link>
           <Link href="/videolar" prefetch={false}>Videolar</Link>
           <Link href="/arsiv" prefetch={false}>Arşiv</Link>
           <Link href="/sunucular" prefetch={false}>Sunucular</Link>
@@ -91,6 +92,7 @@ export function SiteHeader() {
         </Link>
       </header>
       <nav className="mobile-nav" aria-label="Mobil menü">
+        <Link href="/yayin" prefetch={false}>Canlı</Link>
         <Link href="/videolar" prefetch={false}>Videolar</Link>
         <Link href="/arsiv" prefetch={false}>Arşiv</Link>
         <Link href="/sunucular" prefetch={false}>Sunucular</Link>

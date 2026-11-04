@@ -138,3 +138,20 @@ export const communityMessages = sqliteTable(
     ),
   ],
 );
+
+export const livePresence = sqliteTable("live_presence", {
+  sessionId: text("session_id").primaryKey(),
+  lastSeenAt: integer("last_seen_at").notNull(),
+});
+
+export const liveMessages = sqliteTable(
+  "live_messages",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userEmail: text("user_email").notNull(),
+    displayName: text("display_name").notNull(),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index("live_messages_created_idx").on(table.createdAt)],
+);

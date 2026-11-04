@@ -204,7 +204,7 @@ export function AdminContentManager({
                 <strong>{link.label}</strong>
                 {link.key === "live" && (
                   <small>
-                    Yayına başladığınızda doğrudan yayın bağlantısını yapıştırın.
+                    Rumble yayınındaki paylaşım menüsünden /embed/ bağlantısını yapıştırın.
                     Yayın bitince bu satırı kapatın.
                   </small>
                 )}
@@ -247,8 +247,8 @@ export function AdminContentManager({
             </p>
           ) : (
             <p>
-              Canlı yayın bağlantısını eklediğinizde sitede “Yayına geç”
-              duyurusu açılır. YouTube kanal bağlantısı değiştiğinde güncel
+              Rumble /embed/ bağlantısını eklediğinizde yayın sayfasında oynatıcı açılır.
+              YouTube kanal bağlantısı değiştiğinde güncel
               videolar otomatik yenilenir.
             </p>
           )}

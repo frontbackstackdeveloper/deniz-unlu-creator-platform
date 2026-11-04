@@ -47,7 +47,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(home, /hero-cover-card__media/);
   assert.match(home, /hero-cover-card__lotus/);
   assert.match(managedContent, /"live"/);
-  assert.match(adminManager, /doğrudan yayın bağlantısını yapıştırın/);
+  assert.match(adminManager, /Rumble yayınındaki paylaşım menüsünden/);
   assert.match(siteChrome, /brand-monogram--lily/);
   assert.match(siteChrome, /brand-monogram--lotus-image/);
   assert.match(siteChrome, /brand-monogram--footer/);
@@ -69,6 +69,20 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(mobilePerformance, /content-visibility: auto/);
   assert.match(mobilePerformance, /\.server-code--logo/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
+});
+
+test("offers a Rumble live room with opt-in chat and counted presence", async () => {
+  const [page, room, presence, messages] = await Promise.all([
+    source("app/yayin/page.tsx"),
+    source("app/yayin/LiveRoom.tsx"),
+    source("app/api/live/presence/route.ts"),
+    source("app/api/live/messages/route.ts"),
+  ]);
+  assert.match(page, /rumbleEmbedUrl/);
+  assert.match(room, /signin-with-chatgpt/);
+  assert.match(room, /live-room__player/);
+  assert.match(presence, /active \?\? 0\) \* 2/);
+  assert.match(messages, /getChatGPTUser/);
 });
 
 test("keeps giveaway administration and writes server-protected", async () => {

@@ -52,14 +52,12 @@ export default async function Home() {
             <span>DENİZ ÜNLÜ ŞU AN YAYINDA</span>
             <strong>Canlı yayına katıl, macerayı kaçırma.</strong>
           </div>
-          <a
+          <Link
             className="live-broadcast__action"
-            href={links.live}
-            target="_blank"
-            rel="noreferrer"
+            href="/yayin"
           >
             Yayına geç <ArrowIcon />
-          </a>
+          </Link>
         </section>
       )}
 
@@ -133,14 +131,14 @@ export default async function Home() {
                 : "Yayın başladığında aktif platform ve duyurular burada öne çıkar."}
             </span>
             {(links.live || links.whatsapp) && (
-              <a
-                href={links.live || links.whatsapp}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href={links.live ? "/yayin" : links.whatsapp}
+                target={links.live ? undefined : "_blank"}
+                rel={links.live ? undefined : "noreferrer"}
               >
                 {links.live ? "Canlı yayına geç" : "WhatsApp duyuruları"}{" "}
                 <ArrowIcon />
-              </a>
+              </Link>
             )}
           </div>
 
