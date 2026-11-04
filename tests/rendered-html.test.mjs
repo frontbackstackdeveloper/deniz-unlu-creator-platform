@@ -19,6 +19,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     interfacePolish,
     mobilePerformance,
     serverLogos,
+    fallbackServerLogos,
     logoUploadRoute,
     logoReadRoute,
     siteMotion,
@@ -37,6 +38,7 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     source("app/interface-polish.css"),
     source("app/mobile-performance.css"),
     source("app/server-logos.ts"),
+    source("app/server-logo-fallback.ts"),
     source("app/api/admin/servers/logo/route.ts"),
     source("app/api/server-logo/[serverId]/route.ts"),
     source("app/components/SiteMotion.tsx"),
@@ -76,7 +78,8 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(interfacePolish, /\.admin-panel:hover/);
   assert.match(interfacePolish, /\.admin-community-item/);
   assert.match(layout, /mobile-performance\.css/);
-  assert.match(siteChrome, /\/kuzey2-fetih\.png/);
+  assert.match(siteChrome, /getFallbackServerLogo/);
+  assert.match(fallbackServerLogos, /\/kuzey2-fetih\.png/);
   assert.doesNotMatch(siteChrome, /kuzey2\.com\/server\/fetih\.png/);
   assert.match(mobilePerformance, /\.mobile-nav/);
   assert.match(mobilePerformance, /animation: none !important/);
@@ -92,6 +95,29 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(pageMotion, /reveal-pending/);
   assert.match(home, /data-scroll-reveal/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
+});
+
+test("presents recent Dailymotion uploads first with twenty videos per archive page", async () => {
+  const [archive, dailymotion, paginationStyles, adminPage, adminTabs, adminPolish] = await Promise.all([
+    source("app/arsiv/ArchiveExplorer.tsx"),
+    source("app/dailymotion.ts"),
+    source("app/arsiv/archive-pagination.css"),
+    source("app/admin/page.tsx"),
+    source("app/admin/AdminTabs.tsx"),
+    source("app/admin/admin-polish.css"),
+  ]);
+
+  assert.match(dailymotion, /searchParams\.set\("sort", "recent"\)/);
+  assert.match(archive, /const PAGE_SIZE = 20/);
+  assert.match(archive, /publishedAt: video\.created_time \* 1000/);
+  assert.match(archive, /b\.publishedAt - a\.publishedAt/);
+  assert.match(archive, /visibleVideos\.slice\(/);
+  assert.match(archive, /archive-pagination/);
+  assert.match(paginationStyles, /\.archive-pagination/);
+  assert.match(adminPage, /<AdminTabs/);
+  assert.match(adminTabs, /Çekiliş ve topluluk/);
+  assert.match(adminTabs, /Yayın, videolar ve sunucular/);
+  assert.match(adminPolish, /\.admin-logo-editor/);
 });
 
 test("offers a Rumble live room with opt-in chat and counted presence", async () => {

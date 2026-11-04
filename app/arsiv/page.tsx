@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./archive-pagination.css";
 import {
   BotanicalBackground,
   PageHero,
@@ -44,6 +45,7 @@ export default async function ArchivePage() {
     accent: video.accent,
     thumbnailUrl: video.thumbnailUrl,
     href: video.href,
+    publishedAt: video.publishedAt ? Date.parse(video.publishedAt) || 0 : 0,
   }));
 
   return (

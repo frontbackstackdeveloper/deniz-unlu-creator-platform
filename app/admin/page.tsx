@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./admin-polish.css";
 import Link from "next/link";
 import { siteContent } from "../content";
 import {
@@ -22,6 +23,7 @@ import { getAdminCommunityMessages } from "../../db/community-store";
 import { AdminContentManager } from "./AdminContentManager";
 import { AdminCommunityManager } from "./AdminCommunityManager";
 import { AdminGiveawayManager } from "./AdminGiveawayManager";
+import { AdminTabs } from "./AdminTabs";
 import type { AdminGiveawayData } from "../giveaway";
 import type { CommunityMessage } from "../community";
 import {
@@ -162,10 +164,13 @@ export default async function AdminPage() {
             </article>
           </div>
 
-          <AdminGiveawayManager initialData={giveawayData} />
-          <AdminCommunityManager initialMessages={communityMessages} />
-
-          <div className="admin-grid">
+          <AdminTabs
+            community={<>
+              <AdminGiveawayManager initialData={giveawayData} />
+              <AdminCommunityManager initialMessages={communityMessages} />
+            </>}
+            content={<>
+            <div className="admin-grid">
             <section className="admin-panel">
               <div className="admin-panel__heading">
                 <div>
@@ -237,6 +242,8 @@ export default async function AdminPage() {
           <AdminContentManager
             initialLinks={managedContent.links}
             initialServers={managedContent.servers}
+          />
+            </>}
           />
         </section>
       )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteNav } from "./SiteNav";
+import { getFallbackServerLogo } from "../server-logo-fallback";
 import { siteContent } from "../content";
 import {
   formatYouTubePublishedDate,
@@ -15,18 +16,6 @@ type DisplayServer = {
   url?: string;
   logoKey?: string;
 };
-
-const officialServerLogos = {
-  kuzey2: "/kuzey2-fetih.png",
-  rohan2: "https://rohan2.global/assets/images/logo.png",
-} as const;
-
-function getOfficialServerLogo(name: string) {
-  const normalizedName = name.toLocaleLowerCase("tr-TR");
-  if (normalizedName.includes("kuzey2")) return officialServerLogos.kuzey2;
-  if (normalizedName.includes("rohan2")) return officialServerLogos.rohan2;
-  return "";
-}
 
 export function ArrowIcon() {
   return <span aria-hidden="true">↗</span>;
@@ -217,7 +206,7 @@ export function ServerList({
       {servers.map((server) => {
         const logoUrl = server.logoKey
           ? `/api/server-logo/${server.id}?v=${encodeURIComponent(server.logoKey)}`
-          : getOfficialServerLogo(server.name);
+          : getFallbackServerLogo(server.name);
         const normalizedStatus = server.status.toLocaleLowerCase("tr-TR");
         const isActive = ["aktif", "yayında", "canlı"].some((status) =>
           normalizedStatus.includes(status),

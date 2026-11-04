@@ -21,7 +21,10 @@ export type ArchiveCatalogVideo = {
   accent: "cyan" | "gold" | "blue" | "teal";
   thumbnailUrl: string;
   href: string;
+  publishedAt: number;
 };
+
+const PAGE_SIZE = 20;
 
 const filters = [
   { value: "tumu", label: "Tümü" },
@@ -41,6 +44,7 @@ export function ArchiveExplorer({
   const dailymotionProfileId = getDailymotionProfileId(dailymotionProfileUrl);
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]["value"]>("tumu");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [videos, setVideos] = useState(initialVideos);
   const [archiveState, setArchiveState] = useState<"loading" | "ready" | "error">(
     dailymotionProfileId ? "loading" : "error",
@@ -55,7 +59,7 @@ export function ArchiveExplorer({
       };
     }
 
-    fetchDailymotionVideos(dailymotionProfileId)
+    const loadArchive = () => fetchDailymotionVideos(dailymotionProfileId)
       .then((dailymotionVideos) => {
         if (cancelled) return;
 
@@ -78,6 +82,7 @@ export function ArchiveExplorer({
             accent: "teal",
             thumbnailUrl: video.thumbnail_720_url,
             href: `/arsiv/izle?v=${video.id}`,
+            publishedAt: video.created_time * 1000,
           }),
         );
 
@@ -88,8 +93,14 @@ export function ArchiveExplorer({
         if (!cancelled) setArchiveState("error");
       });
 
+    void loadArchive();
+    const refresh = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadArchive();
+    }, 5 * 60 * 1000 + 5000);
+
     return () => {
       cancelled = true;
+      window.clearInterval(refresh);
     };
   }, [dailymotionProfileId, initialVideos]);
 
@@ -104,8 +115,23 @@ export function ArchiveExplorer({
           .toLocaleLowerCase("tr-TR");
 
       return matchesFilter && searchableText.includes(normalizedQuery);
-    });
+    }).sort((a, b) => b.publishedAt - a.publishedAt || a.id.localeCompare(b.id));
   }, [activeFilter, query, videos]);
+
+  const pageCount = Math.max(1, Math.ceil(visibleVideos.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageVideos = visibleVideos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pageNumbers = [...new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount])]
+    .filter((number) => number >= 1 && number <= pageCount)
+    .sort((a, b) => a - b);
+
+  function moveToPage(nextPage: number) {
+    setPage(nextPage);
+    document.getElementById("archive-results")?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
+  }
 
   return (
     <div className="archive-explorer">
@@ -115,7 +141,7 @@ export function ArchiveExplorer({
             <button
               className={activeFilter === filter.value ? "is-active" : ""}
               type="button"
-              onClick={() => setActiveFilter(filter.value)}
+              onClick={() => { setActiveFilter(filter.value); setPage(1); }}
               key={filter.value}
             >
               {filter.label}
@@ -129,15 +155,15 @@ export function ArchiveExplorer({
           <input
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => { setQuery(event.target.value); setPage(1); }}
             placeholder="Arşivde ara..."
           />
         </label>
       </div>
 
-      <div className="archive-results-heading">
+      <div className="archive-results-heading" id="archive-results">
         <p>
-          <strong>{visibleVideos.length}</strong> içerik gösteriliyor
+          <strong>{visibleVideos.length}</strong> içerik · {currentPage}/{pageCount}. sayfa
         </p>
         <span>
           {archiveState === "loading"
@@ -150,7 +176,7 @@ export function ArchiveExplorer({
 
       {visibleVideos.length > 0 ? (
         <div className="archive-catalog">
-          {visibleVideos.map((video, index) => {
+          {pageVideos.map((video, index) => {
             const cardContent = (
               <>
                 <div
@@ -164,7 +190,7 @@ export function ArchiveExplorer({
                   }
                 >
                   <span className="archive-card__index">
-                    {String(index + 1).padStart(2, "0")}
+                    {String((currentPage - 1) * PAGE_SIZE + index + 1).padStart(2, "0")}
                   </span>
                   <span className="archive-card__source">{video.source}</span>
                   <span className="archive-card__play" aria-hidden="true">
@@ -212,6 +238,23 @@ export function ArchiveExplorer({
           <h3>Bu aramaya uygun içerik bulunamadı.</h3>
           <p>Farklı bir kelime veya kategori deneyebilirsiniz.</p>
         </div>
+      )}
+      {pageCount > 1 && (
+        <nav className="archive-pagination" aria-label="Arşiv sayfaları">
+          <button type="button" disabled={currentPage === 1} onClick={() => moveToPage(currentPage - 1)}>← Önceki</button>
+          {pageNumbers.map((number, index) => (
+            <span key={number}>
+              {index > 0 && number - pageNumbers[index - 1] > 1 && <span className="archive-pagination__gap" aria-hidden="true">…</span>}
+              <button
+                type="button"
+                aria-label={`${number}. sayfa`}
+                aria-current={currentPage === number ? "page" : undefined}
+                onClick={() => moveToPage(number)}
+              >{number}</button>
+            </span>
+          ))}
+          <button type="button" disabled={currentPage === pageCount} onClick={() => moveToPage(currentPage + 1)}>Sonraki →</button>
+        </nav>
       )}
     </div>
   );

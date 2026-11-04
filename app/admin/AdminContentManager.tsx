@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   ManagedServer,
   ManagedSocialLink,
 } from "../managed-content";
+import { getFallbackServerLogo } from "../server-logo-fallback";
 
 type AdminContentManagerProps = {
   initialLinks: ManagedSocialLink[];
@@ -42,6 +43,7 @@ export function AdminContentManager({
   const [savingLinks, setSavingLinks] = useState(false);
   const [busyServerId, setBusyServerId] = useState<number | "new" | null>(null);
   const [newServerLogo, setNewServerLogo] = useState<File | null>(null);
+  const [newServerLogoPreview, setNewServerLogoPreview] = useState<string | null>(null);
   const [newServer, setNewServer] = useState({
     name: "",
     code: "",
@@ -50,6 +52,11 @@ export function AdminContentManager({
     url: "",
     isVisible: true,
   });
+
+  useEffect(() => {
+    if (!newServerLogoPreview) return;
+    return () => URL.revokeObjectURL(newServerLogoPreview);
+  }, [newServerLogoPreview]);
 
   function updateLink(
     key: ManagedSocialLink["key"],
@@ -138,6 +145,7 @@ export function AdminContentManager({
         name: "", code: "", status: "AKTİF", detail: "", url: "", isVisible: true,
       });
       setNewServerLogo(null);
+      setNewServerLogoPreview(null);
       if (logo && data.id) {
         try {
           await uploadLogo(data.id, logo);
@@ -388,26 +396,35 @@ export function AdminContentManager({
                 />
               </label>
               <div className="admin-logo-editor">
-                {server.logoKey && (
+                {server.logoKey || getFallbackServerLogo(server.name) ? (
                   <img
-                    src={`/api/server-logo/${server.id}?v=${encodeURIComponent(server.logoKey)}`}
+                    src={server.logoKey
+                      ? `/api/server-logo/${server.id}?v=${encodeURIComponent(server.logoKey)}`
+                      : getFallbackServerLogo(server.name)}
                     alt={`${server.name} logosu`}
                   />
+                ) : (
+                  <span className="admin-logo-editor__placeholder" aria-hidden="true">PNG</span>
                 )}
-                <label>
-                  <span>Sunucu PNG logosu (en fazla 2 MB)</span>
-                  <input
-                    type="file"
-                    accept="image/png,.png"
-                    disabled={busyServerId === server.id}
-                    onChange={(event) => {
-                      void changeLogo(server.id, event.target.files?.[0] ?? null);
-                      event.target.value = "";
-                    }}
-                  />
-                </label>
+                <div className="admin-logo-editor__copy">
+                  <strong>Sunucu görseli</strong>
+                  <small>Şeffaf PNG önerilir · En fazla 2 MB</small>
+                  <label className="admin-logo-editor__upload">
+                    <span>{server.logoKey ? "PNG değiştir" : "PNG yükle"} ↗</span>
+                    <input
+                      type="file"
+                      accept="image/png,.png"
+                      aria-label={`${server.name} için PNG yükle`}
+                      disabled={busyServerId === server.id}
+                      onChange={(event) => {
+                        void changeLogo(server.id, event.target.files?.[0] ?? null);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
                 {server.logoKey && (
-                  <button type="button" disabled={busyServerId === server.id} onClick={() => removeLogo(server.id)}>
+                  <button className="admin-logo-editor__remove" type="button" disabled={busyServerId === server.id} onClick={() => removeLogo(server.id)}>
                     Logoyu kaldır
                   </button>
                 )}
@@ -501,14 +518,30 @@ export function AdminContentManager({
                 placeholder="https://..."
               />
             </label>
-            <label className="admin-new-logo">
-              <span>Sunucu PNG logosu (isteğe bağlı, en fazla 2 MB)</span>
-              <input
-                type="file"
-                accept="image/png,.png"
-                onChange={(event) => setNewServerLogo(event.target.files?.[0] ?? null)}
-              />
-            </label>
+            <div className="admin-logo-editor admin-logo-editor--new">
+              {newServerLogoPreview ? (
+                <img src={newServerLogoPreview} alt="Seçilen sunucu logosu önizlemesi" />
+              ) : (
+                <span className="admin-logo-editor__placeholder" aria-hidden="true">PNG</span>
+              )}
+              <div className="admin-logo-editor__copy">
+                <strong>Yeni sunucu logosu</strong>
+                <small>{newServerLogo ? newServerLogo.name : "İsteğe bağlı · Şeffaf PNG · En fazla 2 MB"}</small>
+                <label className="admin-logo-editor__upload">
+                  <span>{newServerLogo ? "Farklı PNG seç" : "PNG seç"} ↗</span>
+                  <input
+                    type="file"
+                    accept="image/png,.png"
+                    aria-label="Yeni sunucu için PNG seç"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] ?? null;
+                      setNewServerLogo(file);
+                      setNewServerLogoPreview(file ? URL.createObjectURL(file) : null);
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
             <button
               className="button button--primary"
               type="button"
