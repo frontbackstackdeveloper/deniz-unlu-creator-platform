@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SiteNav } from "./SiteNav";
 import { siteContent } from "../content";
 import {
   formatYouTubePublishedDate,
@@ -12,6 +13,7 @@ type DisplayServer = {
   status: string;
   detail: string;
   url?: string;
+  logoKey?: string;
 };
 
 const officialServerLogos = {
@@ -78,27 +80,13 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav aria-label="Ana menü">
-          <Link href="/yayin" prefetch={false}>Canlı Yayın</Link>
-          <Link href="/videolar" prefetch={false}>Videolar</Link>
-          <Link href="/arsiv" prefetch={false}>Arşiv</Link>
-          <Link href="/sunucular" prefetch={false}>Sunucular</Link>
-          <Link href="/cekilis" prefetch={false}>Çekiliş</Link>
-          <Link href="/topluluk" prefetch={false}>Topluluk</Link>
-        </nav>
+        <SiteNav />
 
         <Link className="header-cta" href="/#topluluk">
           Bağlantılar <ArrowIcon />
         </Link>
       </header>
-      <nav className="mobile-nav" aria-label="Mobil menü">
-        <Link href="/yayin" prefetch={false}>Canlı</Link>
-        <Link href="/videolar" prefetch={false}>Videolar</Link>
-        <Link href="/arsiv" prefetch={false}>Arşiv</Link>
-        <Link href="/sunucular" prefetch={false}>Sunucular</Link>
-        <Link href="/cekilis" prefetch={false}>Çekiliş</Link>
-        <Link href="/topluluk" prefetch={false}>Topluluk</Link>
-      </nav>
+      <SiteNav mobile />
     </>
   );
 }
@@ -227,7 +215,9 @@ export function ServerList({
   return (
     <div className="server-list">
       {servers.map((server) => {
-        const logoUrl = getOfficialServerLogo(server.name);
+        const logoUrl = server.logoKey
+          ? `/api/server-logo/${server.id}?v=${encodeURIComponent(server.logoKey)}`
+          : getOfficialServerLogo(server.name);
         const normalizedStatus = server.status.toLocaleLowerCase("tr-TR");
         const isActive = ["aktif", "yayında", "canlı"].some((status) =>
           normalizedStatus.includes(status),

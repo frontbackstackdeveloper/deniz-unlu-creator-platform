@@ -58,6 +58,7 @@ export const servers = sqliteTable("servers", {
   status: text("status").notNull().default("inactive"),
   detail: text("detail").notNull().default(""),
   url: text("url"),
+  logoKey: text("logo_key"),
   sortOrder: integer("sort_order").notNull().default(0),
   isVisible: integer("is_visible", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

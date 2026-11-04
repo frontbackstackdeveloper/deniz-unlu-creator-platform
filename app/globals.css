@@ -35,11 +35,17 @@ html {
 }
 
 ::view-transition-old(root) {
-  animation: page-leave 120ms ease-in both;
+  animation: page-leave 90ms ease-in both;
 }
 
 ::view-transition-new(root) {
-  animation: page-arrive 260ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+  animation: page-arrive 230ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main:not(.admin-page) {
+    animation: page-content-enter 230ms cubic-bezier(0.16, 0.82, 0.22, 1) both;
+  }
 }
 
 body {
@@ -1424,22 +1430,24 @@ main {
 @keyframes page-leave {
   to {
     opacity: 0;
-    filter: blur(5px);
-    transform: scale(0.992) translateY(-5px);
+    transform: translateY(-3px);
   }
 }
 
 @keyframes page-arrive {
   from {
     opacity: 0;
-    filter: blur(7px);
-    transform: scale(1.008) translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    filter: blur(0);
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
   }
+}
+
+@keyframes page-content-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes live-broadcast-in {

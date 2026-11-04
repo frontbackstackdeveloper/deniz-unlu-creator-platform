@@ -9,6 +9,7 @@ import {
   saveManagedLinks,
 } from "../../../../db/content-store";
 import { isYouTubeChannelUrl } from "../../../youtube";
+import { rumbleEmbedUrl } from "../../../rumble";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,9 @@ export async function PUT(request: Request) {
         throw new Error(
           "YouTube alanına kanal ana sayfasının bağlantısını yazın.",
         );
+      }
+      if (fallback.key === "live" && Boolean(item?.isActive) && !rumbleEmbedUrl(url)) {
+        throw new Error("Canlı yayın için Rumble paylaşım menüsündeki /embed/ bağlantısını kullanın.");
       }
 
       return {

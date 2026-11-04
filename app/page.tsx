@@ -14,6 +14,7 @@ import { getPublicManagedContent } from "../db/content-store";
 import { getPublicGiveaway } from "../db/giveaway-store";
 import { managedLinksToMap } from "./managed-content";
 import { getCurrentYouTubeVideos } from "./youtube";
+import { SiteMotion } from "./components/SiteMotion";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export default async function Home() {
 
   return (
     <main>
+      <SiteMotion />
       <BotanicalBackground />
       <div className="ambient ambient--one" aria-hidden="true" />
       <div className="ambient ambient--two" aria-hidden="true" />
@@ -152,7 +154,7 @@ export default async function Home() {
         </aside>
       </section>
 
-      <section className="section shell" id="yayinlar">
+      <section className="section shell" id="yayinlar" data-scroll-reveal>
         <div className="section-heading">
           <div>
             <p className="section-kicker">HIZLI ERİŞİM</p>
@@ -175,7 +177,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section shell channel-section" id="arsiv">
+      <section className="section shell channel-section" id="arsiv" data-scroll-reveal>
         <div className="channel-feature">
           <div>
             <p className="section-kicker">AKTİF YOUTUBE KANALI</p>
@@ -213,7 +215,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section shell" id="sunucular">
+      <section className="section shell" id="sunucular" data-scroll-reveal>
         <div className="section-heading">
           <div>
             <p className="section-kicker">AKTİF MACERA</p>
@@ -227,7 +229,7 @@ export default async function Home() {
         <ServerList servers={managedContent.servers} />
       </section>
 
-      <section className="giveaway shell" id="cekilis">
+      <section className="giveaway shell" id="cekilis" data-scroll-reveal>
         <div className="giveaway-copy">
           <p className="section-kicker">TOPLULUK ÇEKİLİŞİ</p>
           {giveaway?.isOpen && (

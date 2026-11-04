@@ -4,6 +4,7 @@ import { containsBlockedCommunityLanguage } from "../../../community-moderation"
 import { getAdminSession } from "../../../admin/admin-auth";
 import { getPublicManagedContent } from "../../../../db/content-store";
 import { managedLinksToMap } from "../../../managed-content";
+import { rumbleEmbedUrl } from "../../../rumble";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
   const user = await getChatGPTUser();
   if (!user) return Response.json({ error: "Mesaj yazmak için giriş yapın." }, { status: 401 });
   const links = managedLinksToMap((await getPublicManagedContent()).links);
-  if (!/^https:\/\/(www\.)?rumble\.com\/embed\/v[a-z0-9]+\/?$/i.test(links.live)) {
+  if (!rumbleEmbedUrl(links.live)) {
     return Response.json({ error: "Sohbet yalnızca yayın sırasında açıktır." }, { status: 403 });
   }
   const origin = request.headers.get("origin");

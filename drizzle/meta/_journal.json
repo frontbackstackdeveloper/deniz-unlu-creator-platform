@@ -50,6 +50,13 @@
       "when": 1793792374873,
       "tag": "0006_big_miracleman",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793794573045,
+      "tag": "0007_kind_rictor",
+      "breakpoints": true
     }
   ]
 }

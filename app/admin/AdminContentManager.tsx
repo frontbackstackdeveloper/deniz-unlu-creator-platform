@@ -21,6 +21,7 @@ async function readJson(response: Response) {
     error?: string;
     links?: ManagedSocialLink[];
     servers?: ManagedServer[];
+    id?: number;
   };
 
   if (!response.ok) {
@@ -40,6 +41,7 @@ export function AdminContentManager({
   const [serverNotice, setServerNotice] = useState<Notice>(null);
   const [savingLinks, setSavingLinks] = useState(false);
   const [busyServerId, setBusyServerId] = useState<number | "new" | null>(null);
+  const [newServerLogo, setNewServerLogo] = useState<File | null>(null);
   const [newServer, setNewServer] = useState({
     name: "",
     code: "",
@@ -131,20 +133,70 @@ export function AdminContentManager({
         }),
       );
       if (data.servers) setServers(data.servers);
+      const logo = newServerLogo;
       setNewServer({
-        name: "",
-        code: "",
-        status: "AKTİF",
-        detail: "",
-        url: "",
-        isVisible: true,
+        name: "", code: "", status: "AKTİF", detail: "", url: "", isVisible: true,
       });
+      setNewServerLogo(null);
+      if (logo && data.id) {
+        try {
+          await uploadLogo(data.id, logo);
+        } catch (error) {
+          setServerNotice({
+            tone: "error",
+            text: `Sunucu eklendi; logo yüklenemedi: ${error instanceof Error ? error.message : "Tekrar deneyin."}`,
+          });
+          return;
+        }
+      }
       setServerNotice({ tone: "success", text: "Yeni sunucu eklendi." });
     } catch (error) {
       setServerNotice({
         tone: "error",
         text: error instanceof Error ? error.message : "Sunucu eklenemedi.",
       });
+    } finally {
+      setBusyServerId(null);
+    }
+  }
+
+  async function uploadLogo(id: number, file: File) {
+    if (file.size > 2 * 1024 * 1024) {
+      throw new Error("PNG en fazla 2 MB olabilir.");
+    }
+    const form = new FormData();
+    form.set("serverId", String(id));
+    form.set("logo", file);
+    const data = await readJson(await fetch("/api/admin/servers/logo", {
+      method: "POST",
+      body: form,
+    }));
+    if (data.servers) setServers(data.servers);
+  }
+
+  async function changeLogo(id: number, file: File | null) {
+    if (!file) return;
+    setBusyServerId(id);
+    setServerNotice(null);
+    try {
+      await uploadLogo(id, file);
+      setServerNotice({ tone: "success", text: "Sunucu PNG logosu yüklendi." });
+    } catch (error) {
+      setServerNotice({ tone: "error", text: error instanceof Error ? error.message : "Logo yüklenemedi." });
+    } finally {
+      setBusyServerId(null);
+    }
+  }
+
+  async function removeLogo(id: number) {
+    setBusyServerId(id);
+    setServerNotice(null);
+    try {
+      const data = await readJson(await fetch(`/api/admin/servers/logo?serverId=${id}`, { method: "DELETE" }));
+      if (data.servers) setServers(data.servers);
+      setServerNotice({ tone: "success", text: "Yüklenen logo kaldırıldı." });
+    } catch (error) {
+      setServerNotice({ tone: "error", text: error instanceof Error ? error.message : "Logo kaldırılamadı." });
     } finally {
       setBusyServerId(null);
     }
@@ -234,7 +286,7 @@ export function AdminContentManager({
                   }
                 />
                 <span aria-hidden="true" />
-                <small>{link.isActive && link.url.trim() ? "Yayında" : "Kapalı"}</small>
+                <small>{link.isActive && link.url.trim() ? (link.key === "live" ? "Yayında" : "Etkin") : "Kapalı"}</small>
               </label>
             </div>
           ))}
@@ -335,6 +387,31 @@ export function AdminContentManager({
                   placeholder="https://..."
                 />
               </label>
+              <div className="admin-logo-editor">
+                {server.logoKey && (
+                  <img
+                    src={`/api/server-logo/${server.id}?v=${encodeURIComponent(server.logoKey)}`}
+                    alt={`${server.name} logosu`}
+                  />
+                )}
+                <label>
+                  <span>Sunucu PNG logosu (en fazla 2 MB)</span>
+                  <input
+                    type="file"
+                    accept="image/png,.png"
+                    disabled={busyServerId === server.id}
+                    onChange={(event) => {
+                      void changeLogo(server.id, event.target.files?.[0] ?? null);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                {server.logoKey && (
+                  <button type="button" disabled={busyServerId === server.id} onClick={() => removeLogo(server.id)}>
+                    Logoyu kaldır
+                  </button>
+                )}
+              </div>
               <div className="admin-server-row__actions">
                 <button
                   type="button"
@@ -422,6 +499,14 @@ export function AdminContentManager({
                   }))
                 }
                 placeholder="https://..."
+              />
+            </label>
+            <label className="admin-new-logo">
+              <span>Sunucu PNG logosu (isteğe bağlı, en fazla 2 MB)</span>
+              <input
+                type="file"
+                accept="image/png,.png"
+                onChange={(event) => setNewServerLogo(event.target.files?.[0] ?? null)}
               />
             </label>
             <button

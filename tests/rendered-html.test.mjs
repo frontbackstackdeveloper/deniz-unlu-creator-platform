@@ -18,6 +18,12 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     styles,
     interfacePolish,
     mobilePerformance,
+    serverLogos,
+    logoUploadRoute,
+    logoReadRoute,
+    siteMotion,
+    pageMotion,
+    siteNav,
   ] =
     await Promise.all([
     source("app/page.tsx"),
@@ -30,6 +36,12 @@ test("contains the completed Deniz Ünlü public experience", async () => {
     source("app/globals.css"),
     source("app/interface-polish.css"),
     source("app/mobile-performance.css"),
+    source("app/server-logos.ts"),
+    source("app/api/admin/servers/logo/route.ts"),
+    source("app/api/server-logo/[serverId]/route.ts"),
+    source("app/components/SiteMotion.tsx"),
+    source("app/page-motion.css"),
+    source("app/components/SiteNav.tsx"),
   ]);
 
   assert.match(home, /Yayın kaçarsa/);
@@ -52,7 +64,9 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(siteChrome, /brand-monogram--lotus-image/);
   assert.match(siteChrome, /brand-monogram--footer/);
   assert.match(siteChrome, /METİN2 YOLCULUĞU/);
-  assert.match(siteChrome, /prefetch=\{false\}/);
+  assert.match(siteChrome, /<SiteNav \/>/);
+  assert.match(siteNav, /usePathname/);
+  assert.match(siteNav, /aria-current/);
   assert.match(styles, /@keyframes border-light-orbit/);
   assert.match(styles, /--orbit-angle/);
   assert.match(styles, /lotus-cursor\.png/);
@@ -68,21 +82,34 @@ test("contains the completed Deniz Ünlü public experience", async () => {
   assert.match(mobilePerformance, /animation: none !important/);
   assert.match(mobilePerformance, /content-visibility: auto/);
   assert.match(mobilePerformance, /\.server-code--logo/);
+  assert.match(adminManager, /Sunucu PNG logosu/);
+  assert.match(serverLogos, /validateServerLogo/);
+  assert.match(serverLogos, /MAX_SERVER_LOGO_BYTES/);
+  assert.match(logoUploadRoute, /getAdminSession/);
+  assert.match(logoUploadRoute, /validateServerLogo/);
+  assert.match(logoReadRoute, /image\/png/);
+  assert.match(siteMotion, /IntersectionObserver/);
+  assert.match(pageMotion, /reveal-pending/);
+  assert.match(home, /data-scroll-reveal/);
   assert.doesNotMatch(`${home}\n${layout}`, /codex-preview|SkeletonPreview/);
 });
 
 test("offers a Rumble live room with opt-in chat and counted presence", async () => {
-  const [page, room, presence, messages] = await Promise.all([
+  const [page, room, presence, messages, rumble, adminContent] = await Promise.all([
     source("app/yayin/page.tsx"),
     source("app/yayin/LiveRoom.tsx"),
     source("app/api/live/presence/route.ts"),
     source("app/api/live/messages/route.ts"),
+    source("app/rumble.ts"),
+    source("app/api/admin/content/route.ts"),
   ]);
   assert.match(page, /rumbleEmbedUrl/);
   assert.match(room, /signin-with-chatgpt/);
   assert.match(room, /live-room__player/);
   assert.match(presence, /active \?\? 0\) \* 2/);
   assert.match(messages, /getChatGPTUser/);
+  assert.match(rumble, /\/embed\//);
+  assert.match(adminContent, /rumbleEmbedUrl\(url\)/);
 });
 
 test("keeps giveaway administration and writes server-protected", async () => {

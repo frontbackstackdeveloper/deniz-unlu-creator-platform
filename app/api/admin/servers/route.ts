@@ -2,10 +2,12 @@ import { getAdminSession } from "../../../admin/admin-auth";
 import {
   createManagedServer,
   deleteManagedServer,
+  getManagedServerLogoKey,
   getManagedContent,
   updateManagedServer,
 } from "../../../../db/content-store";
 import type { ManagedServer } from "../../../managed-content";
+import { getServerLogoBucket } from "../../../server-logos";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +54,7 @@ function readServer(value: unknown, requireId: boolean): ManagedServer {
     status: text(input.status, 40).toLocaleUpperCase("tr-TR") || "AKTİF",
     detail: text(input.detail, 240),
     url: normalizeUrl(input.url),
+    logoKey: "",
     sortOrder: Number.isFinite(Number(input.sortOrder))
       ? Math.max(0, Math.floor(Number(input.sortOrder)))
       : 0,
@@ -116,6 +119,8 @@ export async function DELETE(request: Request) {
     });
   }
 
+  const logoKey = await getManagedServerLogoKey(id);
   await deleteManagedServer(id);
+  if (logoKey) await getServerLogoBucket().delete(logoKey).catch(() => undefined);
   return Response.json(await getManagedContent());
 }

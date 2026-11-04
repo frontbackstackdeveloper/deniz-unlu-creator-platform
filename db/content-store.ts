@@ -24,6 +24,7 @@ type ServerRow = {
   status: string;
   detail: string;
   url: string | null;
+  logo_key: string | null;
   sort_order: number;
   is_visible: number;
 };
@@ -156,6 +157,7 @@ function mapServer(row: ServerRow): ManagedServer {
     status: row.status,
     detail: row.detail,
     url: row.url ?? "",
+    logoKey: row.logo_key ?? "",
     sortOrder: row.sort_order,
     isVisible: row.is_visible === 1,
   };
@@ -174,7 +176,7 @@ async function readManagedContent() {
       .all<SocialLinkRow>(),
     d1
       .prepare(
-        `SELECT id, name, code, status, detail, url, sort_order, is_visible
+        `SELECT id, name, code, status, detail, url, logo_key, sort_order, is_visible
          FROM servers
          ORDER BY sort_order ASC, id ASC`,
       )
@@ -245,7 +247,7 @@ export async function saveManagedLinks(links: ManagedSocialLink[]) {
 }
 
 export async function createManagedServer(
-  input: Omit<ManagedServer, "id" | "sortOrder">,
+  input: Omit<ManagedServer, "id" | "sortOrder" | "logoKey">,
 ) {
   await ensureContentStore();
   const d1 = getD1();
@@ -309,5 +311,24 @@ export async function updateManagedServer(server: ManagedServer) {
 export async function deleteManagedServer(id: number) {
   await ensureContentStore();
   await getD1().prepare("DELETE FROM servers WHERE id = ?").bind(id).run();
+  invalidatePublicData("managed-content");
+}
+
+export async function getManagedServerLogoKey(id: number) {
+  await ensureContentStore();
+  const row = await getD1()
+    .prepare("SELECT logo_key FROM servers WHERE id = ?")
+    .bind(id)
+    .first<{ logo_key: string | null }>();
+  return row === null ? null : (row.logo_key ?? "");
+}
+
+export async function setManagedServerLogoKey(id: number, logoKey: string) {
+  await ensureContentStore();
+  const result = await getD1()
+    .prepare("UPDATE servers SET logo_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+    .bind(logoKey || null, id)
+    .run();
+  if (!result.meta.changes) throw new Error("Sunucu bulunamadı.");
   invalidatePublicData("managed-content");
 }

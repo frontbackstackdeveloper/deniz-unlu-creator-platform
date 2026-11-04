@@ -1,0 +1,1 @@
+ALTER TABLE `servers` ADD `logo_key` text;

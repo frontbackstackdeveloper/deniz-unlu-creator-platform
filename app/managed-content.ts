@@ -27,6 +27,7 @@ export type ManagedServer = {
   status: string;
   detail: string;
   url: string;
+  logoKey: string;
   sortOrder: number;
   isVisible: boolean;
 };
@@ -59,6 +60,7 @@ export const defaultManagedServers: ManagedServer[] = siteContent.servers.map(
     status: server.status,
     detail: server.detail,
     url: server.url,
+    logoKey: "",
     sortOrder: index,
     isVisible: server.isVisible,
   }),
